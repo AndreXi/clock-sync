@@ -4,4 +4,6 @@ It is synchronized with NTP and is adjusted according to the indicated time zone
 
 
 ## Run
+You will need *ntplib* and *win32api*, install it with pip3
+**pip3 install** *name*
 Run __main.py__, at first time the program ask you the time zone, if you want to change it just run __TimeZone.py__
