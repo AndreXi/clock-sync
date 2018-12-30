@@ -9,14 +9,15 @@ indeseados en la hora del sistema (Ej: BIOS sin batería, arranque dual).
 """
 
 print('Modificar la hora del sistema necesita permisos de Administrador')
-print('Para cambiar la zona horaria ejecute "TimeZone.py"')
+print('Para agilizar puedes pasar como argumento la zona horaria')
 
 import time
 import os
 import admin    # Para solicitar privilegios de administrador.
+import sys
 
 
-err = 'ntplib'  # Para mostrar mensajes de error
+err = 'ntplib'  # Para mostrar mensajes de error.
 
 
 def main():
@@ -54,14 +55,33 @@ def main():
         print('Ocurrio un error de comunicacion con el servidor\nRevise su conexion a internet, firewalls, etc')
 
 
+def new_TimeZone():
+    """Le pide al usuario su zona horaria."""
+    instruccions = '''
+    A continuación se debe introducir la zona horaria...
+    Debe seguir obligatoriamente el siguiente formato:
+    -HH:MM                 o                   +HH:MM\n
+    '''
+    r = input(instruccions)
+    return r
+
+
 def zona_horaria():
     """
     Retorna los segundos que se deben sumar al tiempo NTP obtenido
     """
-    from TimeZone import new_TimeZone, get_TimeZone
+    # Si se pasa la zona horaria como argumento se usará primero.
+    if len(sys.argv) > 1:
+        use_argv = True
+    else:
+        use_argv = False
+
     while True:
         try:
-            time_zone = get_TimeZone()
+            if use_argv:
+                time_zone = sys.argv[1]
+            else:
+                time_zone = new_TimeZone()
             time_zone = time_zone.replace('+', '')
             time_zone = time_zone.rsplit(':')
             fix_h = -int(time_zone[0])
@@ -69,8 +89,13 @@ def zona_horaria():
             fix_s = fix_h * 60 * 60 + fix_m * 60
             return fix_s
         except Exception:
-            print('ERROR: La información introducida no sigue el formato dado')
-            new_TimeZone()
+            if use_argv:
+                print('ERROR: El argumento no sigue el formato -HH:MM o +HH:MM')
+                print('El programa ignorará el argumento')
+                use_argv = False
+            else:
+                print('ERROR: La información introducida no sigue el formato dado')
+                new_TimeZone()
 
 
 if __name__ == '__main__':
