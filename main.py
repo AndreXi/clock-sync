@@ -30,24 +30,24 @@ def main():
         client = ntplib.NTPClient()
         response = client.request('pool.ntp.org')
 
-        # Crea un string con un formato cómodo para configurar la hora.
-        f_time = time.strftime('%Y, %m, 0, %d, %H, %M, %S, 0',
-                               time.localtime(response.tx_time + zona_horaria()))
+        # Variables
+        user_tz = user_TimeZoneHandler()
+        user_timezone = user_tz[0] * 60 * 60 + user_tz[1] * 60
+        local_timezone = time.timezone
+        offset = local_timezone * 2 - user_timezone
 
-        # Separa y organiza todo en una lista.
-        f_time = f_time.rsplit(', ')
-        for i in range(len(f_time)):
-            f_time[i] = int(f_time[i])      # Convierte todo en int.
+        # Genera la tupla con la hora actualizada
+        f_time = time.localtime(response.tx_time + offset)
 
         # Aqui se realiza el cambio de hora
         win32api.SetSystemTime(f_time[0],   # Año       %Y
                                f_time[1],   # Mes       %m
-                               f_time[2],   # dayOfWeek ??
-                               f_time[3],   # Dia       %d
-                               f_time[4],   # Hora      %H
-                               f_time[5],   # Minutos   %M
-                               f_time[6],   # Segundos  %S
-                               f_time[7])   # Milisegundos
+                               f_time[6],   # dayOfWeek ??
+                               f_time[2],   # Dia       %d
+                               f_time[3],   # Hora      %H
+                               f_time[4],   # Minutos   %M
+                               f_time[5],   # Segundos  %S
+                               0)           # Milisegundos
 
     except ImportError:
         print('Ocurrio un error importando "{}"\nIntente ejecutar "pip3 install {}"'.format(err, err))
@@ -66,9 +66,9 @@ def new_TimeZone():
     return r
 
 
-def zona_horaria():
+def user_TimeZoneHandler():
     """
-    Retorna los segundos que se deben sumar al tiempo NTP obtenido
+    Retorna una tupla con la zona horaria guardados como enteros
     """
     # Si se pasa la zona horaria como argumento se usará primero.
     if len(sys.argv) > 1:
@@ -86,8 +86,7 @@ def zona_horaria():
             time_zone = time_zone.rsplit(':')
             fix_h = -int(time_zone[0])
             fix_m = -int(time_zone[1])
-            fix_s = fix_h * 60 * 60 + fix_m * 60
-            return fix_s
+            return (fix_h, fix_m)
         except Exception:
             if use_argv:
                 print('ERROR: El argumento no sigue el formato -HH:MM o +HH:MM')
