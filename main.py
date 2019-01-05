@@ -126,7 +126,10 @@ if __name__ == '__main__' and os.name == 'nt':
         admin.runAsAdmin()          # Si, por alguna razon necesito ejecutarlo 2 veces
     else:
         reset_clock()               # Evita errores por reloj muy adelantado
-        main()                      # Ajusta el reloj
+        i = 0
+        while main() and i <= 10:   # Ajusta el reloj
+            i += 1
+            print('Intento (%s / 10)' % (i))                 
         if len(sys.argv) > 2:
             if sys.argv[2] == '-n':
                 pass
